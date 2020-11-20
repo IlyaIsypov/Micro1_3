@@ -532,6 +532,8 @@ int LineExec(deque<vector<string>> &commands) {
         ProcessTime();
     }
     //чистим сист файлы
+    remove(a.c_str());
+    remove(b.c_str());
     //ofstream fout;
     //fout.open(a);
     //fout.close();
@@ -580,11 +582,9 @@ void LineProcessing(string line){
 
 int start(){
     string UserName = getenv("USER");
-    //cout << UserName << "\n";
     
     string line;
-    //!!!
-    chdir("/Users/isypov/Desktop/test");
+    //chdir("/Users/isypov/Desktop/test");
     //
     while(1){
         cout <<CurDir();
