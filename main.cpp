@@ -13,11 +13,11 @@
 #include <vector>
 #include <fstream>
 
-#include <sys/types.h>      /* needed to use pid_t, etc. */
-#include <sys/wait.h>       /* needed to use wait() */
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>         /* LINUX constants and functions (fork(), etc.) */
+#include <unistd.h>
 #include <fcntl.h>
 using namespace std;
 
@@ -38,22 +38,17 @@ void ProcessTime() {
 string CurDir () {
     char dir[FILENAME_MAX];
     getcwd(dir, FILENAME_MAX);
-    //for (int i = 0; i < 10; i++) cout << dir[i];
     string CD = string(dir);
     return CD;
 }
 
 void ExecPwd(string a) {
-    //close(1);//descriptor вывода
-    //const char *name1 = a.c_str();
-    //int t = open(name1, O_RDWR | O_CREAT |O_TRUNC, 0666);
-    
+   
     ofstream fout;
     fout.open(a);
     string S;
     fout << CurDir() << "\n";
     fout.close();
-    //close(t);
 }
 
 int ExecCd(vector<string> &command) {
@@ -120,23 +115,18 @@ int StarSubs(string word1, vector<string> &variants) {
         close(fd[1]);
         read(fd[0], buff, 1000);
         string buffs(buff);
-        //free(buff);
-         //cout <<"BEGIN LIST\n"<< buffs<<"END";
-        //бьем на строки buff
         vector<string> dir;
         
         while (buffs.find('\n') != -1) {
             dir.push_back(buffs.substr(0, buffs.find('\n')));
             string word = buffs.substr(0, buffs.find('\n'));
-            //cout << " look " << word ;
-            //подходит ли по РВ
+            
             char *crv = new char[rv.length() + 1];
             strcpy(crv, rv.c_str());
             
             char *cword = new char[word.length() + 1];
             strcpy(cword, word.c_str());
             
-            //cout << " "<<Acception(cword, crv) << endl;
             if(Acception(cword, crv) == 1) variants.push_back(word);
             buffs = buffs.substr(buffs.find('\n') + 1, buffs.size());
         }
@@ -155,11 +145,10 @@ int StarDir(string direction, string start_dir, vector<string> &variants) {
         StarSubs("*", vars);
         for (vector<string>::iterator it = vars.begin() ; it!=vars.end() ; ++it) {
             variants.push_back("/"+*it);
-            //cout <<"VARS: " <<*it <<endl;
+            
         }
         return 1;
     }
-    //string start_dir = CurDir();
     vector<string> dirs = {""};
     //разбиваем по '/'
     for(int i = 1; i < direction.size(); i++) {
@@ -197,19 +186,10 @@ int StarDir(string direction, string start_dir, vector<string> &variants) {
     vector<string> vars;
     StarSubs(dirs[i], vars);
     for (vector<string>::iterator it = vars.begin() ; it!=vars.end() ; ++it) {
-        //cout <<"go_dir " << go_dir <<" it: "<<*it<<" tale: " << tale <<endl;
-        //cout << "direct "<<direction<<endl;
-        //cout <<"now dir "<< CurDir()<<endl;
-        //cout <<"it: "<< *it << endl;
-        //cout <<"tale: "<< tale << endl;
-        //cout << go_dir + "/" + *it + "/" + tale << endl;
         if(tale!="")
             StarDir(go_dir + "/" + *it + "/" + tale, start_dir, variants);
         else
             StarDir(go_dir + "/" + *it, start_dir, variants);
-        //else
-        //cout << go_dir;
-           // cout<<*it <<endl;
     }
     return 0;
 }
@@ -260,39 +240,25 @@ int StarLine(vector<string> &commands) {
 int ExecCom(vector<string> command, string a, string b, int k){
     vector<char *> arg;
     for (int i = 0; i < command.size(); ++i) {
-        //cout << "comi:"<<command[i].c_str()<<endl;
         arg.push_back((char *) command[i].c_str());
     }
     arg.push_back(NULL);
-    
-    
-    //int fd[2];
-    //pipe(fd);
+
         pid_t pid = fork();
         if (pid == 0) {
             //cout << "ok3";
             if(k!=0) {
-                close(0);//descriptor ввода
+                close(0);
                 const char *name = a.c_str();
                 open(name, O_RDWR | O_CREAT, 0666);
             }
-            close(1);//descriptor вывода
+            close(1);
             const char *name1 = b.c_str();
             open(name1, O_RDWR | O_CREAT |O_TRUNC, 0666);
-            //cout << "ok4"<<arg[0]<<endl;
             execvp(arg[0], &arg[0]);
-            //cout << "ok6";
         } else {
             int info;
-            //string line;
-            //close(0);
-            //const char *name = a.c_str();
-            //int t = open(name, O_RDWR | O_CREAT, 0666);
-            //dup2(t, 0);
-            
             waitpid(pid, &info, 0);
-            //close(t);
-            //dup2(0,0);
         }
     return 0;
 }
@@ -310,14 +276,13 @@ void Out(vector<string> commands, string &filename, int sign, string &inoutfile,
         pid_t pid = fork();
         if (pid == 0) {
             if(k != 0) {
-                close(0);//descriptor ввода
+                close(0);
                 const char *name1 = inoutfile.c_str();
                 open(name1, O_RDWR | O_CREAT, 0666);
             }
-            close(1);//descriptor вывода
+            close(1);
             const char *name = filename.c_str();
             open(name, O_RDWR | O_CREAT | O_TRUNC, 0666);
-            //делаем а файлом вывода
             execvp(cod.c_str(), &args[0]);
         } else {
             int info;
@@ -333,11 +298,9 @@ void Out(vector<string> commands, string &filename, int sign, string &inoutfile,
             close(1);
             const char *name1 = inoutfile.c_str();
             open(name1, O_RDWR | O_CREAT | O_TRUNC, 0666);
-            //делаем а файлом ввода.
             execvp(cod.c_str(), &args[0]);
         } else {
             int info;
-            //cout << info;
             waitpid(pid, &info, 0);
         }
     }
@@ -350,19 +313,17 @@ void Out2(vector<string> commands, string &filename1, string &filename2) {
         args.push_back((char *) commands[i].c_str());
     }
     args.push_back(NULL);
-    
-    
     //cases com < a > b & com > a < b
     int fd[2];
     pipe(fd);
     // fn1 > com > fn2
         pid_t pid = fork();
         if (pid == 0) {
-            close(0);//descriptor ввода
+            close(0);
             const char *name = filename1.c_str();
             open(name, O_RDWR | O_CREAT, 0666);
             
-            close(1);//descriptor вывода
+            close(1);
             const char *name1 = filename2.c_str();
             open(name1, O_RDWR | O_CREAT | O_TRUNC, 0666);
             execvp(cod.c_str(), &args[0]);
@@ -387,34 +348,24 @@ int LineExec(deque<vector<string>> &commands) {
         long len = command.size();
         
         for (long i = 0; i < len; i++) {
-            //cout <<"com i:" << command[i]<<endl;
             if(command[i].find('*')!=-1 || command[i].find('?')!=-1 || command[i].find('/')!=-1) {
-                //удаляем *?
-                //cout << "yes" << command[i]<<endl;
                 StarLine(command);
-                //cout << "after:";
-                //for (int w = 0; w < command.size(); w++) cout << command[w] <<" ";
-                //cout << endl;
                 break;
-                //return 1;
+               
             }
         }
         
         for (long i = 0; i < len; i++) {
             if(command[i] == "<" || command[i] == ">") {
-                //cout << "comi:" << command[i]<<endl;
                 p++;
             }
         }
         
         if(command[0] == "time") {
-            //cout << "time)\n";
             proc_timer = 1;
             command.erase(command.begin());
         }
-        //cout << "p:"<<p<<endl;
         if(p == 2) {
-            //cout << "ok";
             if(command.size() < 5) return 0;
             if(command[command.size() - 4] == "<" && command[command.size() - 2] == ">") {
                 if(commands.size() == 1 && k == 0) {
@@ -444,18 +395,15 @@ int LineExec(deque<vector<string>> &commands) {
                         cout <<"com < a not in start of conv\n";
                         return 0;
                     } else {
-                        //cout << "ok";
                         Out(command, command[command.size() - 1], 0, b, k);
-                        //return 1;
                     }
-                //if(k == 0)
                 }
                 else if (command[command.size() - 2] == ">") {
                     if(commands.size() != 1) {
                         cout <<"com > a not in end of conv\n";
                         return 0;
                     } else {
-                        //cout << "ok >\n";
+                        
                         if(k%2 == 1) {
                             Out(command, command[command.size() - 1], 1, b, k);
                         } else {
@@ -496,16 +444,14 @@ int LineExec(deque<vector<string>> &commands) {
             else {
                 ExecCom(command, b, a, k);
             }
-            //ExecOuter(command);
-            //cout <<"k:"<<k<<endl;
+            
             
         }
         k++;
-        //ProcessTime();
-        //cout << "k:"<<k<<endl;
+        
         commands.pop_front();
     }
-    //cout <<"heelp\n";
+   
     if(k%2 == 0) {
         //внимательно с чтением в конце
         //cout <<"case1"<<endl;
@@ -534,11 +480,6 @@ int LineExec(deque<vector<string>> &commands) {
     //чистим сист файлы
     remove(a.c_str());
     remove(b.c_str());
-    //ofstream fout;
-    //fout.open(a);
-    //fout.close();
-    //fout.open(b);
-    //fout.close();
     return 1;
 }
 
@@ -546,7 +487,6 @@ void LineProcessing(string line){
     //разбиваем каждую команду на string элементы
     deque<vector<string>> commands;
     commands.push_back(vector<string>());
-    //long len = line.length();
     string com = "";
     
     char *word;
@@ -557,35 +497,23 @@ void LineProcessing(string line){
     {
         string s = word;
         if (s == "|"){
-            //cout << "\n";
             commands.push_back(vector<string>());
-            //commands содержат компоненты конвеера
         }
         else {
-            //cout << s;
             commands.back().push_back(s);
         }
         word = strtok(NULL, " \t\r\n\a");
     }
     
-    //CommandsExec(commands);
     LineExec(commands);
-    /*
-    int t = commands.size();
-    cout << "com qnt:" << t <<"\n";
-    for (int i = 0; i < t; i++) {
-        for(int j = 0; j < commands[i].size(); j++) cout << commands[i][j] << " ";
-        cout << endl;
-    }
-     */
+    
 }
 
-int start(){
+int Microsha(){
     string UserName = getenv("USER");
     
     string line;
     //chdir("/Users/isypov/Desktop/test");
-    //
     while(1){
         cout <<CurDir();
         if (UserName == "root") {
@@ -595,20 +523,17 @@ int start(){
         }
         if(getline(cin, line)) {
             if(line.length()!= 0 ) {
-                //cout << "look:" << line << endl;
                 LineProcessing(line);
             }
-            //else return 1;
         }
         else return 1;
-        //cout << "work\n";
     }
     return 1;
    
 }
 
 int main(int argc, const char * argv[]) {
-    start();
+    Microsha();
     return 0;
 }
 
