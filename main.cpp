@@ -1,9 +1,8 @@
 //
 //  main.cpp
-//  Micro1_2
+//  Micro1_3
 //
-//  Created by Исыпов Илья on 12.11.2020.
-//
+
 
 #include <iostream>
 #include <string>
